@@ -1,0 +1,8 @@
+#+title: CI/CD Pipeline
+
+* TODO Test the webhook
+- are the HTTP form fields parsed correctly?
+
+* TODO Execution of shell script
+
+* TODO Verification of the webhook
