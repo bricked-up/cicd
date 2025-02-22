@@ -19,7 +19,7 @@ func testWebHook(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    branch := r.PostFormValue("refs")
+    branch := r.PostFormValue("ref")
 
     if branch != "refs/heads/master" {
         log.Println("Push event is not on the desired branch: ", branch)
