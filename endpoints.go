@@ -4,6 +4,7 @@ import (
     "log"
     "net/http"
     "encoding/json"
+    "strings"
 )
 
 
@@ -20,16 +21,25 @@ func testWebHook(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    var body []byte
+    var buf []byte = make([]byte, 1024)
+    var body strings.Builder
     var webhook WebHookRequest
 
-    _, err := r.Body.Read(body)
-    if err != nil {
-        log.Println("Could not ready body data.")
-        return
+    for {
+        bytes_read, err := r.Body.Read(buf)
+        if err != nil {
+            log.Println("Could not ready body data.")
+            return
+        }
+
+        body.WriteString(string(buf))
+
+        if bytes_read == 0 {
+            break
+        }
     }
 
-    err = json.Unmarshal(body, &webhook)
+    err := json.Unmarshal([]byte(body.String()), &webhook)
     if err != nil {
         log.Println("Could not parse JSON!")
         return
