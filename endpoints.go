@@ -4,16 +4,15 @@ import (
     "log"
     "net/http"
     "encoding/json"
-    "strings"
+    "io"
 )
 
 
-type WebHookRequest struct {
-    Ref string `json:"Ref"`
-}
+// HandleWebHook checks if the request is a valid webhook. If it is
+// the service is rebuilt.
+func handleWebHook(w http.ResponseWriter, r *http.Request) {
+    w.WriteHeader(http.StatusOK)
 
-
-func testWebHook(w http.ResponseWriter, r *http.Request) {
     githubEvent := r.Header.Get("x-github-event")
 
     if githubEvent != "push" {
@@ -21,25 +20,15 @@ func testWebHook(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    var buf []byte = make([]byte, 1024)
-    var body strings.Builder
-    var webhook WebHookRequest
-
-    for {
-        bytes_read, err := r.Body.Read(buf)
-        if err != nil {
-            log.Println("Could not ready body data.")
-            return
-        }
-
-        body.WriteString(string(buf))
-
-        if bytes_read == 0 {
-            break
-        }
+    body, err := io.ReadAll(r.Body)
+    if err != nil {
+        log.Println("Could not read request body!")
+        return
     }
 
-    err := json.Unmarshal([]byte(body.String()), &webhook)
+    var webhook WebHookRequest
+
+    err = json.Unmarshal(body, &webhook)
     if err != nil {
         log.Println("Could not parse JSON!")
         return
