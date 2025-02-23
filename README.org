@@ -1,7 +1,8 @@
 #+title: CI/CD Pipeline
 
-* TODO Test the webhook
-- are the HTTP form fields parsed correctly?
+* DONE Test the webhook
+- webhook info is parsed correctly
+- ability to distinguish branches
 
 * TODO Execution of shell script
 
