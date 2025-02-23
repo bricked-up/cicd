@@ -17,9 +17,9 @@ func handleWebHook(w http.ResponseWriter, r *http.Request) {
     githubEvent := r.Header.Get("x-github-event")
 
     if githubEvent != "push" {
-        msg := fmt.Sprintf("Recieved an unrecognized Github event: %s\n", githubEvent)
+        msg := fmt.Sprintf("Recieved an unrecognized Github event: %s", githubEvent)
         log.Println(msg)
-        fmt.Fprint(w, msg)
+        fmt.Fprintln(w, msg)
         return
     }
 
@@ -27,7 +27,7 @@ func handleWebHook(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         msg := "Could not read request body!"
         log.Println(msg)
-        fmt.Fprint(w, msg)
+        fmt.Fprintln(w, msg)
         return
     }
 
@@ -37,14 +37,14 @@ func handleWebHook(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         msg := "Could not parse JSON!"
         log.Println(msg)
-        fmt.Fprint(w, msg)
+        fmt.Fprintln(w, msg)
         return
     }
 
     if webhook.Ref != "refs/heads/master" {
-        msg := fmt.Sprintf("Push event is not on the desired branch: %s\n", webhook.Ref)
+        msg := fmt.Sprintf("Push event is not on the desired branch: %s", webhook.Ref)
         log.Println(msg)
-        fmt.Fprint(w, msg)
+        fmt.Fprintln(w, msg)
         return
     }
 
