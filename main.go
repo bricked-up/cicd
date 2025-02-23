@@ -1,15 +1,16 @@
 package main
 
 import (
-    "log"
-    "net/http"
+	cicd "brickedup/cicd/src"
+	"log"
+	"net/http"
 )
 
-const PORT = ":3000"
-
 func main() {
-    http.HandleFunc("/", handleWebHook)
+    cicd.SetupConfig()
 
-    log.Printf("CI/CD running on localhost%s/", PORT)
-    log.Fatal(http.ListenAndServe(PORT, nil))
+    http.HandleFunc("/", cicd.HandleWebHook)
+
+    log.Printf("CI/CD running on localhost%s/", cicd.ProgramConfig.Port)
+    log.Fatal(http.ListenAndServe(cicd.ProgramConfig.Port, nil))
 }

@@ -1,17 +1,30 @@
-package main
+// Cicd handles webhook requests from Github and rebuilds the backend service.
+// Only `push` webhooks are accepted on the master branch.
+package cicd
 
 import (
-    "fmt"
-    "log"
-    "net/http"
-    "encoding/json"
-    "io"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
 )
 
+// Validate confirms whether or not the request comes from desired Github repo.
+func validate(payload []byte, hash []byte) bool {
+    mac := hmac.New(sha256.New, []byte(ProgramConfig.Secret))
+    mac.Write(payload)
+
+    return hmac.Equal(mac.Sum(nil), hash)
+}
 
 // HandleWebHook checks if the request is a valid webhook. If it is
 // the service is rebuilt.
-func handleWebHook(w http.ResponseWriter, r *http.Request) {
+func HandleWebHook(w http.ResponseWriter, r *http.Request) {
+    // NOTE: Always return OK (unless build process fails). That way erroneous requests
+    // won't affect the build status.
     w.WriteHeader(http.StatusOK)
 
     githubEvent := r.Header.Get("x-github-event")
@@ -29,6 +42,18 @@ func handleWebHook(w http.ResponseWriter, r *http.Request) {
         log.Println(msg)
         fmt.Fprintln(w, msg)
         return
+    }
+
+    if ProgramConfig.Secret != "" {
+        githubHash := r.Header.Get("X-Hub-Signature-256")
+
+        if !validate(body, []byte(githubHash)) {
+            msg := "Invalid secret!"
+            log.Println(msg)
+            fmt.Fprintln(w, msg)
+            return
+        }
+
     }
 
     var webhook WebHookRequest

@@ -1,9 +1,25 @@
 #+title: CI/CD Pipeline
 
-* DONE Test the webhook
-- webhook info is parsed correctly
-- ability to distinguish branches
+Cicd handles webhook requests from Github and rebuilds the backend service. Only ~push~ webhooks are accepted on the master branch.
 
-* TODO Execution of shell script
+* Build
+#+begin_src shell
+  go build
+#+end_src
 
-* TODO Verification of the webhook
+* Usage
+#+begin_src shell
+  ./cicd
+#+end_src
+
+For more information:
+#+begin_src shell
+  ./cicd -h
+#+end_src
+
+** Flags
+- port
+- secret
+
+* Verification of WebHook
+The webhook will only be verified if a secret is provided as a [[*Flags][flag]].
