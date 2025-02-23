@@ -1,6 +1,7 @@
 package main
 
 import (
+    "fmt"
     "log"
     "net/http"
     "encoding/json"
@@ -16,13 +17,17 @@ func handleWebHook(w http.ResponseWriter, r *http.Request) {
     githubEvent := r.Header.Get("x-github-event")
 
     if githubEvent != "push" {
-        log.Println("Recieved an unrecognized Github event:", githubEvent)
+        msg := fmt.Sprintf("Recieved an unrecognized Github event: %s\n", githubEvent)
+        log.Println(msg)
+        fmt.Fprint(w, msg)
         return
     }
 
     body, err := io.ReadAll(r.Body)
     if err != nil {
-        log.Println("Could not read request body!")
+        msg := "Could not read request body!"
+        log.Println(msg)
+        fmt.Fprint(w, msg)
         return
     }
 
@@ -30,12 +35,16 @@ func handleWebHook(w http.ResponseWriter, r *http.Request) {
 
     err = json.Unmarshal(body, &webhook)
     if err != nil {
-        log.Println("Could not parse JSON!")
+        msg := "Could not parse JSON!"
+        log.Println(msg)
+        fmt.Fprint(w, msg)
         return
     }
 
     if webhook.Ref != "refs/heads/master" {
-        log.Println("Push event is not on the desired branch: ", webhook.Ref)
+        msg := fmt.Sprintf("Push event is not on the desired branch: %s\n", webhook.Ref)
+        log.Println(msg)
+        fmt.Fprint(w, msg)
         return
     }
 
