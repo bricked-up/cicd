@@ -1,6 +1,6 @@
 #+title: CI/CD Pipeline
 
-Cicd handles webhook requests from Github and rebuilds the backend service. Only ~push~ webhooks are accepted on the master branch.
+Cicd handles webhook requests from Github and executes a custom script.
 
 * Build
 #+begin_src shell
@@ -16,11 +16,6 @@ For more information:
 #+begin_src shell
   ./cicd -h
 #+end_src
-
-** Flags
-- port
-- secret
-- config
 
 * Configuration
 When you run the program for the first time, a default configuration file will be created. You can specify any number of ~Actions~ as you desire. Each ~Action~ determines how to handle a specific endpoint. See the comments in the configuration file for more details on all the options.
