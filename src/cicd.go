@@ -31,7 +31,7 @@ func (ep *EndpointConfig) Handle(w http.ResponseWriter, r *http.Request) {
 
     githubEvent := r.Header.Get("x-github-event")
 
-    if githubEvent != ep.Event {
+    if ep.Event != "" && githubEvent != ep.Event {
         msg := fmt.Sprintf("Recieved an unrecognized Github event: %s", githubEvent)
         log.Println(msg)
         fmt.Fprintln(w, msg)

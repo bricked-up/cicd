@@ -4,10 +4,10 @@ package cicd
 // EndpointConfig configures options for an endpoint.
 type EndpointConfig struct {
     Name string `toml:"Name" comment:"name of the endpoint"`
-    Event string `toml:"Event" comment:"which webhook event to listen for"` 
-    Branch string `toml:"Branch" comment:"which branch to listen for"` 
+    Event string `toml:"Event" comment:"optional webhook event to listen for"` 
+    Branch string `toml:"Branch" comment:"optional branch to listen for"` 
     Secret string `toml:"Secret" comment:"optional secret to validate webhooks"` 
-    Script string `toml:"Secret" comment:"path to script for webhook"`
+    Script string `toml:"Script" comment:"optional path to a script for webhook"`
 }
 
 // GlobalConfig configures the options for the entire program.

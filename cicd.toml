@@ -7,9 +7,11 @@ ConfigFile = 'cicd.toml'
 [[Actions]]
 # name of the endpoint
 Name = 'default'
-# which webhook event to listen for
+# optional webhook event to listen for
 Event = 'push'
-# which branch to listen for
+# optional branch to listen for
 Branch = 'refs/heads/master'
 # optional secret to validate webhooks
 Secret = ''
+# optional path to a script for webhook
+Script = ''
