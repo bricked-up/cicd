@@ -3,33 +3,35 @@
 package cicd
 
 import (
+    "net/http"
+    "encoding/json"
+    "log"
+    "fmt"
+    "io"
+    "os/exec"
 	"crypto/hmac"
 	"crypto/sha256"
-	"encoding/json"
-	"fmt"
-	"io"
-	"log"
-	"net/http"
 )
 
+
 // Validate confirms whether or not the request comes from desired Github repo.
-func validate(payload []byte, hash []byte) bool {
-    mac := hmac.New(sha256.New, []byte(ProgramConfig.Secret))
+func (ep *EndpointConfig) validate(payload []byte, hash []byte) bool {
+    mac := hmac.New(sha256.New, []byte(ep.Secret))
     mac.Write(payload)
 
     return hmac.Equal(mac.Sum(nil), hash)
 }
 
-// HandleWebHook checks if the request is a valid webhook. If it is
-// the service is rebuilt.
-func HandleWebHook(w http.ResponseWriter, r *http.Request) {
+
+// Handle executes an action based on the action's EndpointConfig.
+func (ep *EndpointConfig) Handle(w http.ResponseWriter, r *http.Request) {
     // NOTE: Always return OK (unless build process fails). That way erroneous requests
     // won't affect the build status.
     w.WriteHeader(http.StatusOK)
 
     githubEvent := r.Header.Get("x-github-event")
 
-    if githubEvent != "push" {
+    if githubEvent != ep.Event {
         msg := fmt.Sprintf("Recieved an unrecognized Github event: %s", githubEvent)
         log.Println(msg)
         fmt.Fprintln(w, msg)
@@ -44,10 +46,10 @@ func HandleWebHook(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    if ProgramConfig.Secret != "" {
+    if ep.Secret != "" {
         githubHash := r.Header.Get("X-Hub-Signature-256")
 
-        if !validate(body, []byte(githubHash)) {
+        if !ep.validate(body, []byte(githubHash)) {
             msg := "Invalid secret!"
             log.Println(msg)
             fmt.Fprintln(w, msg)
@@ -66,12 +68,27 @@ func HandleWebHook(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    if webhook.Ref != "refs/heads/master" {
-        msg := fmt.Sprintf("Push event is not on the desired branch: %s", webhook.Ref)
+    if ep.Branch != "" && webhook.Ref != ep.Branch {
+        msg := fmt.Sprintf("Push event is not on the desired branch: %s", ep.Branch)
         log.Println(msg)
         fmt.Fprintln(w, msg)
         return
     }
 
-    log.Println("Webhook captured successfully!")
+    var cmd *exec.Cmd
+
+    if ep.Script != "" {
+        cmd = exec.Command(ep.Script)
+    } else {
+        cmd = exec.Command("echo 'Webhook processed successfully!'")
+    }
+
+    err = cmd.Run()
+    if err != nil {
+        msg := fmt.Sprintf("Could not run script: %s", ep.Script)
+        log.Println(msg)
+        fmt.Fprintln(w, msg)
+        return
+    }
 }
+

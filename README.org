@@ -20,6 +20,9 @@ For more information:
 ** Flags
 - port
 - secret
+- config
 
-* Verification of WebHook
-The webhook will only be verified if a secret is provided as a [[*Flags][flag]].
+* Configuration
+When you run the program for the first time, a default configuration file will be created. You can specify any number of ~Actions~ as you desire. Each ~Action~ determines how to handle a specific endpoint. See the comments in the configuration file for more details on all the options.
+
+*NOTE*: If no script is provided, a successful webhook processing will print out a simple message to the console.

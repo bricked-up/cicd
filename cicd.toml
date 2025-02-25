@@ -1,0 +1,15 @@
+# port to listen on localhost
+Port = ':7123'
+# path to default config
+ConfigFile = 'cicd.toml'
+
+# actions to configure
+[[Actions]]
+# name of the endpoint
+Name = 'default'
+# which webhook event to listen for
+Event = 'push'
+# which branch to listen for
+Branch = 'refs/heads/master'
+# optional secret to validate webhooks
+Secret = ''
