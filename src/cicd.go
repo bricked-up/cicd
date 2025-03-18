@@ -17,14 +17,13 @@ import (
 // Validate confirms whether or not the request comes from desired Github repo.
 func (ep *EndpointConfig) validate(payload []byte, hash []byte) bool {
     mac := hmac.New(sha256.New, []byte(ep.Secret))
+    mac.Write(payload)
 
     // NOTE: Github appends sha256= prefix to the signature.
-    sanitizedPayload := payload[len("sha256="):]
-    log.Println(string(sanitizedPayload))
+    sanitizedHash := hash[len("sha256="):]
+    log.Println(string(sanitizedHash))
 
-    mac.Write(sanitizedPayload)
-
-    return hmac.Equal(mac.Sum(nil), hash)
+    return hmac.Equal(mac.Sum(nil), sanitizedHash)
 }
 
 
