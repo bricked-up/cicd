@@ -3,27 +3,26 @@
 package cicd
 
 import (
-    "net/http"
-    "encoding/json"
-    "log"
-    "fmt"
-    "io"
-    "os/exec"
 	"crypto/hmac"
 	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os/exec"
 )
-
 
 // Validate confirms whether or not the request comes from desired Github repo.
 func (ep *EndpointConfig) validate(payload []byte, hash []byte) bool {
     mac := hmac.New(sha256.New, []byte(ep.Secret))
+    mac.Write(payload)
+
+    expected := hex.EncodeToString(mac.Sum(nil))
 
     // NOTE: Github appends sha256= prefix to the signature.
-    sanitizedPayload := payload[len("sha256="):]
-
-    mac.Write(sanitizedPayload)
-
-    return hmac.Equal(mac.Sum(nil), hash)
+    return hmac.Equal([]byte("sha256=" + expected), hash)
 }
 
 
@@ -88,13 +87,7 @@ func (ep *EndpointConfig) Handle(w http.ResponseWriter, r *http.Request) {
     }
 
     // NOTE: Github requests have a 10s timeout.
-    // But the commands may need longer to run, hence we flush the HTTP response.
-    f, ok := w.(http.Flusher)
-    if ok {
-        f.Flush()
-    }
-
-    err = cmd.Run()
+    err = cmd.Start()
     if err != nil {
         msg := fmt.Sprintf("Could not run script: %s", ep.Script)
         log.Println(msg)
