@@ -3,27 +3,26 @@
 package cicd
 
 import (
-    "net/http"
-    "encoding/json"
-    "log"
-    "fmt"
-    "io"
-    "os/exec"
 	"crypto/hmac"
 	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os/exec"
 )
-
 
 // Validate confirms whether or not the request comes from desired Github repo.
 func (ep *EndpointConfig) validate(payload []byte, hash []byte) bool {
     mac := hmac.New(sha256.New, []byte(ep.Secret))
     mac.Write(payload)
 
-    // NOTE: Github appends sha256= prefix to the signature.
-    sanitizedHash := hash[len("sha256="):]
-    log.Println(string(sanitizedHash))
+    expected := hex.EncodeToString(mac.Sum(nil))
 
-    return hmac.Equal(mac.Sum(nil), sanitizedHash)
+    // NOTE: Github appends sha256= prefix to the signature.
+    return hmac.Equal([]byte("sha256=" + expected), hash)
 }
 
 
