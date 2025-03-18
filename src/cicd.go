@@ -20,6 +20,7 @@ func (ep *EndpointConfig) validate(payload []byte, hash []byte) bool {
 
     // NOTE: Github appends sha256= prefix to the signature.
     sanitizedPayload := payload[len("sha256="):]
+    log.Println(string(sanitizedPayload))
 
     mac.Write(sanitizedPayload)
 
