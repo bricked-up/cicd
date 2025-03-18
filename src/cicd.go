@@ -87,13 +87,7 @@ func (ep *EndpointConfig) Handle(w http.ResponseWriter, r *http.Request) {
     }
 
     // NOTE: Github requests have a 10s timeout.
-    // But the commands may need longer to run, hence we flush the HTTP response.
-    f, ok := w.(http.Flusher)
-    if ok {
-        f.Flush()
-    }
-
-    err = cmd.Run()
+    err = cmd.Start()
     if err != nil {
         msg := fmt.Sprintf("Could not run script: %s", ep.Script)
         log.Println(msg)
