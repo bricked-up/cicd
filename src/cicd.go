@@ -72,7 +72,7 @@ func (ep *EndpointConfig) Handle(w http.ResponseWriter, r *http.Request) {
     }
 
     if ep.Branch != "" && webhook.Ref != ep.Branch {
-        msg := fmt.Sprintf("Push event is not on the desired branch: %s", ep.Branch)
+        msg := fmt.Sprintf("Push event is not on the desired branch: %s", webhook.Ref)
         log.Println(msg)
         fmt.Fprintln(w, msg)
         return
@@ -86,11 +86,13 @@ func (ep *EndpointConfig) Handle(w http.ResponseWriter, r *http.Request) {
         cmd = exec.Command("echo 'Webhook processed successfully!'")
     }
 
-    // NOTE: Github requests have a 10s timeout.
-    err = cmd.Start()
+    // NOTE: Since GitHub webhooks have a timeout of 10s,
+    // longer scripts should be run in the background with &
+    err = cmd.Run()
     if err != nil {
         msg := fmt.Sprintf("Could not run script: %s", ep.Script)
         log.Println(msg)
+        fmt.Fprintln(w, msg)
         return
     }
 }
