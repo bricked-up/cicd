@@ -86,14 +86,16 @@ func (ep *EndpointConfig) Handle(w http.ResponseWriter, r *http.Request) {
         cmd = exec.Command("echo 'Webhook processed successfully!'")
     }
 
-    // NOTE: Since GitHub webhooks have a timeout of 10s,
-    // longer scripts should be run in the background with &
-    err = cmd.Run()
-    if err != nil {
-        msg := fmt.Sprintf("Could not run script: %s", ep.Script)
-        log.Println(msg)
-        fmt.Fprintln(w, msg)
-        return
-    }
-}
+    // NOTE: Since GitHub webhooks have a timeout of 10s
+    // we need to execute the command in a goroutine 
+    // (in case it takes a long time to run).
+    go func() {
+        err = cmd.Run()
+        if err != nil {
+            msg := fmt.Sprintf("Could not run script: %s", ep.Script)
+            log.Println(msg)
+        }
 
+        log.Println("Command executed successfully!")
+    }()
+}
